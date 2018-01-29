@@ -79,7 +79,7 @@ float4 q_diff(float4 q1, float4 q2)
 float4 q_look_at(float3 forward, float3 up)
 {
     float3 right = normalize(cross(forward, up));
-    // up = normalize(cross(forward, right));
+    up = normalize(cross(forward, right));
 
     float m00 = right.x;
     float m01 = right.y;

@@ -180,9 +180,11 @@ namespace ProcSkinAnim.Demo
                     Gizmos.DrawWireSphere(cur.position, 0.1f);
 
                     Gizmos.color = Color.green;
-                    var tangent = cur.rotation * Vector3.up;
+                    // var tangent = cur.rotation * Vector3.up;
+                    var tangent = cur.tangent;
                     Gizmos.DrawLine(cur.position, cur.position + tangent * length);
-                    var normal = cur.rotation * Vector3.right;
+                    // var normal = cur.rotation * Vector3.right;
+                    var normal = cur.normal;
                     Gizmos.color = Color.red;
                     Gizmos.DrawLine(cur.position, cur.position + normal * length);
                 }

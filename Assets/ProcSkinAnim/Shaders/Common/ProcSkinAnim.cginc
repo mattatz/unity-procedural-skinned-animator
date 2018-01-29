@@ -7,7 +7,8 @@
 struct GPUBone
 {
     float3 position;
-    float4 rotation;
+    // float4 rotation;
+    float4x4 rotation;
     float3 scale;
     float4x4 comb, local, offset;
 };
@@ -25,7 +26,8 @@ float4x4 GetBoneMatrix(GPUBone bone) {
         0, 0, 1, bone.position.z,
         0, 0, 0, 1
     );
-    float4x4 R = quaternion_to_matrix(bone.rotation);
+    // float4x4 R = quaternion_to_matrix(bone.rotation);
+    float4x4 R = bone.rotation;
     float4x4 S = float4x4(
         bone.scale.x, 0, 0, 0,
         0, bone.scale.y, 0, 0,

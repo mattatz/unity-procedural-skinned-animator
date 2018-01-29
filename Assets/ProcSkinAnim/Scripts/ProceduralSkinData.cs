@@ -7,7 +7,8 @@ namespace ProcSkinAnim
 
     public struct GPUBone {
         public Vector3 position;
-        public Quaternion rotation;
+        // public Quaternion rotation;
+        public Matrix4x4 rotation;
         public Vector3 scale;
 
         public Matrix4x4 comb, local, offset;
@@ -19,7 +20,8 @@ namespace ProcSkinAnim
             offset = local.inverse;
 
             position = Vector3.zero;
-            rotation = Quaternion.identity;
+            // rotation = Quaternion.identity;
+            rotation = Matrix4x4.identity;
             scale = Vector3.one;
         }
     };

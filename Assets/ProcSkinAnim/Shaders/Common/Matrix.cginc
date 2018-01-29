@@ -3,6 +3,8 @@
 
 #include "Quaternion.cginc"
 
+#define IDENTITY_MATRIX float4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+
 float4x4 inverse(float4x4 m) {
     float n11 = m[0][0], n12 = m[1][0], n13 = m[2][0], n14 = m[3][0];
     float n21 = m[0][1], n22 = m[1][1], n23 = m[2][1], n24 = m[3][1];
@@ -174,7 +176,7 @@ float4x4 look_at_matrix(float3 at, float3 eye, float3 up)
 // http://stackoverflow.com/questions/349050/calculating-a-lookat-matrix
 float4x4 look_at_matrix(float3 forward, float3 up)
 {
-    float3 xaxis = cross(forward, up);
+    float3 xaxis = normalize(cross(forward, up));
     float3 yaxis = up;
     float3 zaxis = forward;
     return float4x4(
@@ -183,6 +185,66 @@ float4x4 look_at_matrix(float3 forward, float3 up)
 		xaxis.z, yaxis.z, zaxis.z, 0,
 		0, 0, 0, 1
 	);
+    /*
+    return float4x4(
+		xaxis.x, xaxis.y, xaxis.z, 0,
+		yaxis.x, yaxis.y, yaxis.z, 0,
+		zaxis.x, zaxis.y, zaxis.z, 0,
+		0, 0, 0, 1
+	);
+    */
+}
+
+float4x4 axis_matrix(float3 right, float3 up, float3 forward)
+{
+    float3 xaxis = right;
+    float3 yaxis = up;
+    float3 zaxis = forward;
+    return float4x4(
+		xaxis.x, yaxis.x, zaxis.x, 0,
+		xaxis.y, yaxis.y, zaxis.y, 0,
+		xaxis.z, yaxis.z, zaxis.z, 0,
+		0, 0, 0, 1
+	);
+}
+
+float4x4 extract_rotation_matrix(float4x4 m)
+{
+    float sx = length(float3(m[0][0], m[0][1], m[0][2]));
+    float sy = length(float3(m[1][0], m[1][1], m[1][2]));
+    float sz = length(float3(m[2][0], m[2][1], m[2][2]));
+
+    // if determine is negative, we need to invert one scale
+    float det = determinant(m);
+    if (det < 0) {
+        sx = -sx;
+    }
+
+    float invSX = 1.0 / sx;
+    float invSY = 1.0 / sy;
+    float invSZ = 1.0 / sz;
+
+    m[0][0] *= invSX;
+    m[0][1] *= invSX;
+    m[0][2] *= invSX;
+    m[0][3] = 0;
+
+    m[1][0] *= invSY;
+    m[1][1] *= invSY;
+    m[1][2] *= invSY;
+    m[1][3] = 0;
+
+    m[2][0] *= invSZ;
+    m[2][1] *= invSZ;
+    m[2][2] *= invSZ;
+    m[2][3] = 0;
+
+    m[3][0] = 0;
+    m[3][1] = 0;
+    m[3][2] = 0;
+    m[3][3] = 1;
+
+    return m;
 }
 
 #endif // __MATRIX_INCLUDED__

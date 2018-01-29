@@ -36,6 +36,17 @@ float3 _NoiseOffset, _NoiseParams;
 half2 _Damper;
 half3 _Gravity;
 
+GPUTrail Create(int i)
+{
+    GPUTrail tr;
+    tr.position = float3(_Center.x, _Max.y - _UnitLength * i, _Center.z);
+    tr.velocity = float3(0, 0, 0);
+    tr.normal = float3(0, 0, 1);
+    tr.tangent = float3(0, 1, 0);
+    tr.binormal = float3(1, 0, 0);
+    return tr;
+}
+
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
 {
@@ -43,18 +54,17 @@ void Setup (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
+    float3 offset = random_point_on_sphere(id.xy) * 10;
+
     for (int i = 0; i < _BonesCount; i++) {
-        GPUTrail tr;
-        tr.position = float3(_Center.x, _Max.y - _UnitLength * i, _Center.z);
-        tr.velocity = float3(0, 0, 0);
-        tr.rotation = QUATERNION_IDENTITY;
+        GPUTrail tr = Create(i);
+        tr.position += offset;
         _Trails[index + i] = tr;
     }
 }
 
 void Sequence(int index)
 {
-
     int i;
     for (i = 1; i < _BonesCount; i++)
     {
@@ -63,16 +73,7 @@ void Sequence(int index)
 
         float3 dir = parent.position - child.position;
         float l = length(dir);
-        // child.position = lerp(child.position, child.position + step(_UnitLength, l) * dir, _DT.x);
         child.position = lerp(child.position, child.position + step(_UnitLength, l) * dir, _DT.x);
-
-        /*
-        // child.rotation = q_slerp(child.rotation, parent.rotation, _DT.x * 2.5);
-        float3 tangent = normalize(dir);
-        float3 normal = float3(0, 0, 1);
-        normal = normalize(cross(normalize(cross(normal, tangent)), tangent));
-        child.rotation = q_slerp(child.rotation, q_look_at(normal, tangent), _DT.x * 2.5);
-        */
 
         _Trails[index + i] = child;
     }
@@ -81,12 +82,13 @@ void Sequence(int index)
     float3 p0 = head.position.xyz;
     float3 p1 = _Trails[index + 1].position.xyz;
 
-    float3 t0 = normalize(p1 - p0);
+    float3 t0 = normalize(p0 - p1);
     float3 b0 = cross(t0, normalize(p0));
     float3 n0 = cross(b0, t0);
 
-    head.rotation = q_look_at(n0, t0);
-    // head.rotation = q_slerp(head.rotation, q_look_at(n0, t0), _DT.x);
+    head.normal = n0;
+    head.tangent = t0;
+    head.binormal = b0;
     _Trails[index] = head;
 
     for (i = 1; i < _BonesCount - 1; i++)
@@ -98,8 +100,10 @@ void Sequence(int index)
         float3 n1 = normalize(cross(b0, t1));
 
         GPUTrail cur = _Trails[index + i];
-        cur.rotation = q_look_at(n1, t1);
-        // cur.rotation = q_slerp(cur.rotation, q_look_at(n1, t1), _DT.x);
+        // cur.rotation = q_look_at(n1, t1);
+        cur.normal = n1;
+        cur.tangent = t1;
+        cur.binormal = b0;
         _Trails[index + i] = cur;
 
         b0 = cross(t1, n1);
@@ -113,8 +117,10 @@ void Sequence(int index)
     float3 t1 = normalize(p1 - p0);
     float3 n1 = normalize(cross(b0, t1));
 
-    tail.rotation = q_look_at(n1, t1);
-    // tail.rotation = q_slerp(tail.rotation, q_look_at(n1, t1), _DT.x);
+    // tail.rotation = q_look_at(n1, t1);
+    tail.normal = n1;
+    tail.tangent = t1;
+    tail.binormal = b0;
 
     _Trails[index + _BonesCount - 1] = tail;
 }
@@ -126,28 +132,29 @@ void Update (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
-    GPUTrail tip = _Trails[index];
-    float3 seed = tip.position.xyz;
+    GPUTrail head = _Trails[index];
+
+    float3 v = head.velocity;
+    // Drag and acceleration.
+    v.xyz = v.xyz * _Damper.x + _Gravity.xyz;
+
+    float3 seed = head.position.xyz;
     float3 np = (seed + _NoiseOffset) * _NoiseParams.x;
     float3 n1 = snoise_grad(np);
     float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
-    float3 v = cross(n1, n2) * _NoiseParams.y;
+    v.xyz += cross(n1, n2) * _NoiseParams.y;
     // v = float3(0, 0.1, 0);
 
-    tip.velocity = v;
-
-    tip.position += v;
+    head.velocity = v;
 
     // Apply the velocity cap.
-    float lv = max(length(tip.velocity.xyz), 1e-6);
-    v.xyz = v * min(lv, _Damper.y) / lv;
+    float lv = max(length(v.xyz), 1e-6);
+    v.xyz = v.xyz * min(lv, _Damper.y) / lv;
 
     // Update the position with the velocity.
-    tip.position.xyz += v.xyz * _DT.x;
+    head.position.xyz += v.xyz * _DT.x;
 
-    // tip.rotation = q_slerp(tip.rotation, from_to_rotation(float3(0, 1, 0), normalize(v)), _DT.x);
-
-    _Trails[index] = tip;
+    _Trails[index] = head;
 
     Sequence(index);
 }
@@ -157,9 +164,7 @@ void Apply (uint3 id : SV_DispatchThreadID)
 {
     DISCARD
 
-    // float4x4 moffset = _WorldToLocal;
     float4x4 moffset = _LocalToWorld;
-    // float4x4 moffset = _BindMatrix;
     int ioffset = id.x * _BonesCount;
 
     // debug
@@ -183,12 +188,15 @@ void Apply (uint3 id : SV_DispatchThreadID)
         // float4x4 conv = mul(mul(_LocalToWorld, inverse(moffset)), inverse(bone.local));
         float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
 
-        // float4x4 conv = mul(inverse(moffset), inverse(bone.local));
-        float3 local = mul(conv, float4(tr.position.xyz, 1)).xyz;
-        float4x4 rm = mul(conv, quaternion_to_matrix(tr.rotation));
+        float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
+        // float4x4 rotation = mul(conv, look_at_matrix(tr.normal, tr.tangent));
+        // float4x4 rotation = mul(conv, axis_matrix(cross(tr.normal, tr.tangent), tr.normal, tr.tangent));
+        // float4x4 rotation = mul(conv, axis_matrix(-cross(tr.normal, tr.tangent), tr.normal, tr.tangent));
+        float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
+        // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1)));
 
-        bone.position = local;
-        bone.rotation = matrix_to_quaternion(rm);
+        bone.position = translation;
+        bone.rotation = extract_rotation_matrix(rotation);
 
         // bone.rotation = rotate_angle_axis(sin(_Time.x) * PI, float3(0, 1, 0)); // success
 

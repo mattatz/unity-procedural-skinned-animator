@@ -159,3 +159,22 @@ Cmd: compileComputeKernel
   api=4 insize=2504 outsize=369 ok=1
 Cmd: compileComputeKernel
   api=4 insize=5543 outsize=11969 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2102 outsize=369 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ../Common/Trail.cginc(10): syntax error: unexpected token 'float3'
+  api=4 insize=5198 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=5280 outsize=11245 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5380 outsize=11245 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5517 outsize=11245 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5777 outsize=11373 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(57): incorrect number of arguments to numeric-type constructor
+  api=4 insize=5775 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(61): syntax error: unexpected token 'tr'
+  api=4 insize=5860 outsize=0 ok=0

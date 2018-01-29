@@ -73,22 +73,6 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
     GPUBone root = _Bones[index];
 
-    /*
-    float4x4 mat = mul(root.local, GetBoneMatrix(root));
-    root.comb = mul(mat, root.offset);
-
-    _Bones[offset] = root;
-
-    for (int i = 1; i < _BonesCount; i++) {
-        GPUBone child = _Bones[offset + i];
-
-        mat = mul(mat, mul(child.local, GetBoneMatrix(child)));
-        child.comb = mul(mat, child.offset);
-
-        _Bones[offset + i] = child;
-    }
-    */
-
     float4x4 offset = _LocalToWorld;
 
     for (int i = 0; i < _BonesCount; i++) {
