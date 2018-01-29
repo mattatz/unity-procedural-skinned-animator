@@ -56,7 +56,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
-    float3 offset = random_point_on_sphere(id.xy) * 10;
+    float3 offset = random_point_on_sphere(id.xy);
 
     for (int i = 0; i < _BonesCount; i++) {
         GPUTrail tr = Create(i);
@@ -65,57 +65,36 @@ void Setup (uint3 id : SV_DispatchThreadID)
     }
 }
 
-/*
-
-// Divergence-free noise field
-float3 NoiseField(uint id, float3 p)
+void Header(int index)
 {
-    p += float3(0.9, 1.0, 1.1) * (10.0 * id);
-    float3 n1 = snoise(p).xyz;
-    float3 n2 = snoise(p + float3(15.3, 13.1, 17.4)).xyz;
-    return cross(n1, n2);
-}
+    // Move header of Trails.
 
-void Floating(int index)
-{
-    float3 p_prev = _Trails[index].position.xyz;
-    int i;
-    for (i = 1; i < _BonesCount; i++)
-    {
-        float3 np = (p_prev + _NoiseOffset) * 0.5;
-        float3 v = NoiseField(index, np) * 0.5;
-        float3 p_update = p_prev + v * _DT.x;
-
-        p_prev = _Trails[index + i].position.xyz;
-        _Trails[index + i].position.xyz = p_update;
-    }
-
-    // Retrieve the previous position and velocity.
     GPUTrail head = _Trails[index];
-    float3 p = head.position.xyz;
-    float3 v = head.velocity.xyz;
 
-    // Force from the attactor.
+    float3 v = head.velocity;
 
-    // Force from the noise field.
-    float3 np = (p + _NoiseOffset) * 0.5;
-    float3 f_n = NoiseField(index, np) * 0.5;
+    // Drag 
+    v.xyz = v.xyz * _Damper.x + _Gravity.xyz;
 
-    // Apply drag and acceleration force.
-    v = v * _Damper.x + (f_n) * _DT.x;
+    float3 seed = head.position.xyz;
+    float3 np = (seed + _NoiseOffset) * _NoiseParams.x;
+    float3 n1 = snoise_grad(np);
+    float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
+    v.xyz += cross(n1, n2) * _NoiseParams.y;
 
-    // Update the head position.
-    p += v * _DT.x;
+    head.velocity = v;
 
-    head.position.xyz = p;
-    head.velocity.xyz = v;
+    float lv = max(length(v.xyz), 1e-6);
+    v.xyz = v.xyz * min(lv, _Damper.y) / lv;
+
+    head.position.xyz += v.xyz * _DT.x;
+
     _Trails[index] = head;
 }
-*/
 
 void Sequence(int index)
 {
-    // Floating(index);
+    // 
 
     int i;
     for (i = 1; i < _BonesCount; i++)
@@ -129,6 +108,8 @@ void Sequence(int index)
 
         _Trails[index + i] = child;
     }
+
+    // Calcuate sequencial TNB vectors.
 
     GPUTrail head = _Trails[index];
     float3 p0 = head.position.xyz;
@@ -181,31 +162,7 @@ void Update (uint3 id : SV_DispatchThreadID)
     DISCARD
 
     int index = id.x * _BonesCount;
-
-    GPUTrail head = _Trails[index];
-
-    float3 v = head.velocity;
-    // Drag and acceleration.
-    v.xyz = v.xyz * _Damper.x + _Gravity.xyz;
-
-    float3 seed = head.position.xyz;
-    float3 np = (seed + _NoiseOffset) * _NoiseParams.x;
-    float3 n1 = snoise_grad(np);
-    float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
-    v.xyz += cross(n1, n2) * _NoiseParams.y;
-    // v = float3(0, 0.1, 0);
-
-    head.velocity = v;
-
-    // Apply the velocity cap.
-    float lv = max(length(v.xyz), 1e-6);
-    v.xyz = v.xyz * min(lv, _Damper.y) / lv;
-
-    // Update the position with the velocity.
-    head.position.xyz += v.xyz * _DT.x;
-
-    _Trails[index] = head;
-
+    Header(index);
     Sequence(index);
 }
 
@@ -227,7 +184,7 @@ void Apply (uint3 id : SV_DispatchThreadID)
         GPUBone bone = _Bones[index];
         GPUTrail tr = _Trails[index];
 
-        // copy position and rotation from GPUTrail
+        // Copy position and rotation from GPUTrail to GPUBone
 
         // global to local
         // float3 local = mul(inverse(moffset), mul(_LocalToWorld, float4(tr.position, 1))).xyz;
@@ -237,10 +194,10 @@ void Apply (uint3 id : SV_DispatchThreadID)
         float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
 
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
-        // float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
-        float4x4 rotation = mul(conv, MakeRotationMatrix(tr));
-        // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1)));
+        float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
+        // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1))); // debug
 
+        // set diff TR in local space
         bone.position = translation;
         bone.rotation = extract_rotation_matrix(rotation);
 

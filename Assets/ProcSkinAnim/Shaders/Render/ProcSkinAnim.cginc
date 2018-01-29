@@ -43,7 +43,9 @@ struct Attributes {
     float4 position : POSITION;
     float3 normal : NORMAL;
     float2 texcoord : TEXCOORD0;
+    #if defined(BONE_WEIGHT_DEBUG)
     float3 color : COLOR;
+    #endif
 };
 
 // Fragment varyings
@@ -63,7 +65,9 @@ struct Varyings {
     float2 texcoord : TEXCOORD0;
     half3 ambient : TEXCOORD1;
     float3 wpos : TEXCOORD2;
+    #if defined(BONE_WEIGHT_DEBUG)
     float3 color : COLOR;
+    #endif
 #endif
 };
 
@@ -131,8 +135,9 @@ Varyings Vertex(in Attributes IN, uint vid : SV_VertexID, uint iid : SV_Instance
     o.texcoord = IN.texcoord;
     o.ambient = ShadeSHPerVertex(wnrm, 0);
     o.wpos = wpos;
+    #if defined(BONE_WEIGHT_DEBUG)
     o.color = float3(weight.weight0, weight.weight1, (1.0 * weight.boneIndex0) * _BonesCountInv);
-    // o.color = float3(0, 0, (1.0 * weight.boneIndex0) * _BonesCountInv);
+    #endif
 #endif
 
     return o;
@@ -160,9 +165,11 @@ half4 Fragment() : SV_Target { return 0; }
 
 // GBuffer construction pass
 void Fragment (Varyings input, out half4 outGBuffer0 : SV_Target0, out half4 outGBuffer1 : SV_Target1, out half4 outGBuffer2 : SV_Target2, out half4 outEmission : SV_Target3) {
-    // Sample textures
-    // half3 albedo = tex2D(_MainTex, input.texcoord).rgb * _Color.rgb;
+    #if defined(BONE_WEIGHT_DEBUG)
     half3 albedo = tex2D(_MainTex, input.texcoord).rgb * input.color.rgb;
+    #else
+    half3 albedo = tex2D(_MainTex, input.texcoord).rgb * _Color.rgb;
+    #endif
 
     // PBS workflow conversion (metallic -> specular)
     half3 c_diff, c_spec;

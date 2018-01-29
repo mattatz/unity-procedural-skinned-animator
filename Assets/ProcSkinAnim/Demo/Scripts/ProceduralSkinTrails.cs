@@ -14,12 +14,11 @@ namespace ProcSkinAnim.Demo
 
         #region Particle properties
 
+        [SerializeField] protected float speed = 1f;
         [SerializeField] protected float speedScaleMin = 2.0f, speedScaleMax = 5.0f;
         [SerializeField] protected float speedLimit = 1.0f;
         [SerializeField, Range(0, 15)] protected float drag = 0.1f;
         [SerializeField] protected Vector3 gravity = Vector3.zero;
-        [SerializeField] protected float speedToSpin = 60.0f;
-        [SerializeField] protected float maxSpin = 20.0f;
         [SerializeField] protected float noiseAmplitude = 1.0f;
         [SerializeField] protected float noiseFrequency = 0.01f;
         [SerializeField] protected float noiseMotion = 1.0f;
@@ -65,12 +64,13 @@ namespace ProcSkinAnim.Demo
 
         protected override void Update()
         {
-            ComputeTrails(updateTrailKernel, Time.deltaTime);
-            ComputeTrails(applyTrailKernel, Time.deltaTime);
+            ComputeTrails(updateTrailKernel, Time.deltaTime * speed);
+            ComputeTrails(applyTrailKernel, Time.deltaTime * speed);
             base.Update();
         }
 
         protected void ComputeTrails(Kernel kernel, float dt) {
+            dt = Mathf.Clamp(dt, 0f, 0.1f);
             trailCompute.SetInt(kInstancesCountKey, instancesCount);
             trailCompute.SetBuffer(kernel.Index, kTrailsKey, trailBuffer);
             trailCompute.SetBuffer(kernel.Index, kBonesKey, boneBuffer);
@@ -125,7 +125,7 @@ namespace ProcSkinAnim.Demo
                     // tip case (u <= 0f)
                     weights[i].boneIndex0 = 0;
                     weights[i].weight0 = 1;
-                    weights[i].boneIndex1 = 0;
+                    weights[i].boneIndex1 = 1;
                     weights[i].weight1 = 0;
                 }
             }
@@ -188,18 +188,18 @@ namespace ProcSkinAnim.Demo
 
             Gizmos.matrix = transform.localToWorldMatrix;
 
-            bool test = false;
-
+            /*
             var bones = new GPUBone[boneBuffer.count];
             boneBuffer.GetData(bones);
             for (int i = 0, n = bones.Length; i < n; i++) {
                 var bone = bones[i];
                 if (Check(bone)) {
-                    test = true;
                     // Debug.Log(bone.rotation);
                 }
             }
+            */
 
+            /*
             var trails = new GPUTrail[trailBuffer.count];
             trailBuffer.GetData(trails);
 
@@ -221,15 +221,12 @@ namespace ProcSkinAnim.Demo
                     Gizmos.color = Color.green;
                     Vector3 t = cur.tangent, n = cur.normal, bn = cur.binormal;
 
-                    if (Check(cur) || Check(next)) {
-                        Debug.Log(t);
-                    }
-
                     Gizmos.DrawLine(cur.position, cur.position + t * length);
                     Gizmos.color = Color.red;
                     Gizmos.DrawLine(cur.position, cur.position + n * length);
                 }
             }
+            */
         }
  
         protected override void OnDestroy()
