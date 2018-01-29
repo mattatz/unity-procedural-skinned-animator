@@ -158,13 +158,16 @@ void Apply (uint3 id : SV_DispatchThreadID)
     DISCARD
 
     // float4x4 moffset = _WorldToLocal;
-    // float4x4 moffset = _LocalToWorld;
-    float4x4 moffset = _BindMatrix;
+    float4x4 moffset = _LocalToWorld;
+    // float4x4 moffset = _BindMatrix;
     int ioffset = id.x * _BonesCount;
 
-    // GPUBone root = _Bones[ioffset];
-    // root.position.xyz = float3(id.x / 4, 0, id.x % 4);
-    // _Bones[ioffset] = root;
+    // debug
+    /*
+    GPUBone root = _Bones[ioffset];
+    root.position.xyz = float3(id.x / 4, 0, id.x % 4);
+    _Bones[ioffset] = root;
+    */
 
     for (int i = 0; i < _BonesCount; i++) {
         int index = ioffset + i;
@@ -177,12 +180,17 @@ void Apply (uint3 id : SV_DispatchThreadID)
         // float3 local = mul(inverse(moffset), mul(_LocalToWorld, float4(tr.position, 1))).xyz;
         // local = mul(inverse(bone.local), float4(local.xyz, 1)).xyz;
 
-        float4x4 conv = mul(mul(_LocalToWorld, inverse(moffset)), inverse(bone.local));
+        // float4x4 conv = mul(mul(_LocalToWorld, inverse(moffset)), inverse(bone.local));
+        float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
+
+        // float4x4 conv = mul(inverse(moffset), inverse(bone.local));
         float3 local = mul(conv, float4(tr.position.xyz, 1)).xyz;
         float4x4 rm = mul(conv, quaternion_to_matrix(tr.rotation));
 
         bone.position = local;
-        // bone.rotation = matrix_to_quaternion(rm);
+        bone.rotation = matrix_to_quaternion(rm);
+
+        // bone.rotation = rotate_angle_axis(sin(_Time.x) * PI, float3(0, 1, 0)); // success
 
         _Bones[index] = bone;
 
