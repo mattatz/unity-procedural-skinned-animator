@@ -1,0 +1,161 @@
+Base path: C:/Program Files/Unity/Editor/Data
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  api=4 insize=3635 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3787 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3976 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3798 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4140 outsize=2981 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4061 outsize=1609 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4066 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4209 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4213 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4397 outsize=2809 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4409 outsize=541 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4408 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4438 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4402 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4498 outsize=12221 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4749 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4721 outsize=10057 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5087 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5304 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5310 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5553 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5546 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5546 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6779 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6791 outsize=1001 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6916 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6916 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6966 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6755 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6614 outsize=12793 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6777 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7474 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7419 outsize=13689 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7420 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7364 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(93): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7365 outsize=11725 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7521 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7559 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7831 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7486 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7829 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ../Common/Matrix.cginc(132): array index out of bounds
+  api=4 insize=8030 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(107): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8032 outsize=589 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(107): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8009 outsize=909 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(108): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8016 outsize=685 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(107): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7995 outsize=589 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8225 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8225 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8217 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(98): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8218 outsize=15121 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8322 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6605 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6605 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3233 outsize=1581 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3398 outsize=6189 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3493 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinTrails.compute(111): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=3588 outsize=861 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3588 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3570 outsize=1581 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2975 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3535 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3514 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2482 outsize=369 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2504 outsize=3845 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3651 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3879 outsize=10105 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4355 outsize=17221 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4345 outsize=12001 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4796 outsize=3429 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(137): variable 'local' used without having been completely initialized
+  api=4 insize=4609 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=4612 outsize=11933 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5584 outsize=13789 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5782 outsize=11821 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5461 outsize=15841 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2504 outsize=4109 ok=1

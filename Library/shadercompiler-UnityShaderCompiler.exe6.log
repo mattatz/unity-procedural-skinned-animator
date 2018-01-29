@@ -1,0 +1,161 @@
+Base path: C:/Program Files/Unity/Editor/Data
+Cmd: initializeCompiler
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(107): 'i': loop control variable conflicts with a previous declaration in the outer scope; most recent declaration will be used
+  api=4 insize=3954 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3955 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3798 outsize=2409 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3844 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4066 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4098 outsize=14705 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4397 outsize=3901 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4498 outsize=2409 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4663 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4660 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4739 outsize=11209 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4804 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4804 outsize=10057 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5081 outsize=13517 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5267 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5553 outsize=14917 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6355 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6754 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6916 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6972 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6761 outsize=1193 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6614 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=6732 outsize=10145 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7474 outsize=14969 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(93): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7368 outsize=10353 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(96): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7521 outsize=14045 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7487 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(94): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7603 outsize=10345 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7813 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(94): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7840 outsize=11817 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7486 outsize=10145 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7829 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(98): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=7806 outsize=369 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8055 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(109): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8011 outsize=589 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=7995 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8001 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinAnim.compute(107): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=8230 outsize=589 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=8218 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  error: 1 plat 4 at ProcSkinTrails.compute(98): loop only executes for 0 iteration(s), forcing loop to unroll
+  api=4 insize=6605 outsize=10145 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(11): failed to open source file: '../Common/Random.cginc'
+  api=4 insize=1136 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(69): undeclared identifier '_Damper'
+  api=4 insize=1872 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=2236 outsize=9301 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2682 outsize=12001 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3201 outsize=1581 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3335 outsize=5197 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3431 outsize=5197 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3514 outsize=809 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3538 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3540 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3535 outsize=741 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinAnim.compute(96): undeclared identifier 'GetBoneMatrix'
+  api=4 insize=2480 outsize=0 ok=0
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(118): undeclared identifier 'GetBoneMatrix'
+  api=4 insize=3621 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=2480 outsize=4109 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3517 outsize=809 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2482 outsize=3845 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=3850 outsize=3973 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4256 outsize=12453 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4335 outsize=16761 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4355 outsize=12001 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4344 outsize=12001 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(141): out parameters require l-value arguments
+  api=4 insize=4347 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=4551 outsize=14841 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4551 outsize=14793 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4615 outsize=11581 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4735 outsize=11581 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4765 outsize=14037 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=4774 outsize=15485 ok=1
+Cmd: compileComputeKernel
+  error: 2 plat 4 at ProcSkinTrails.compute(95): cannot convert from 'struct GPUTrail' to 'float3'
+  api=4 insize=5270 outsize=0 ok=0
+Cmd: compileComputeKernel
+  api=4 insize=5464 outsize=15841 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=2504 outsize=369 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5543 outsize=11969 ok=1
