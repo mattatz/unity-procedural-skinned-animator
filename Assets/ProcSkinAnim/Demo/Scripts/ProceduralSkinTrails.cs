@@ -42,7 +42,7 @@ namespace ProcSkinAnim.Demo
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
         #endregion
 
-        protected override void Start ()
+        protected override void Start()
         {
             base.Start();
 
@@ -63,7 +63,7 @@ namespace ProcSkinAnim.Demo
             ComputeTrails(setupTrailKernel, 0f);
         }
 
-        protected override void Update ()
+        protected override void Update()
         {
             ComputeTrails(updateTrailKernel, Time.deltaTime);
             ComputeTrails(applyTrailKernel, Time.deltaTime);
@@ -98,7 +98,7 @@ namespace ProcSkinAnim.Demo
             trailCompute.Dispatch(kernel.Index, instancesCount / kernel.ThreadX + 1, kernel.ThreadY, kernel.ThreadZ);
         }
 
-        protected override GPUBoneWeight[] BuildWeights ()
+        protected override GPUBoneWeight[] BuildWeights()
         {
             var bounds = mesh.bounds;
             Vector3 min = bounds.min, max = bounds.max;
@@ -106,11 +106,11 @@ namespace ProcSkinAnim.Demo
             var vertices = mesh.vertices;
 
             var weights = new GPUBoneWeight[mesh.vertexCount];
-            for(int i = 0, n = vertices.Length; i < n; i++)
+            for (int i = 0, n = vertices.Length; i < n; i++)
             {
                 var p = vertices[i];
                 var u = (boneCount - 1) - ((p.y - min.y) / unit);
-                if(u > 0f)
+                if (u > 0f)
                 {
                     var lu = Mathf.FloorToInt(u);
                     var cu = Mathf.CeilToInt(u);
@@ -132,7 +132,7 @@ namespace ProcSkinAnim.Demo
             return weights;
         }
 
-        protected override GPUBone[] BuildBones ()
+        protected override GPUBone[] BuildBones()
         {
             var bounds = mesh.bounds;
             Vector3 min = bounds.min, max = bounds.max;
@@ -142,10 +142,10 @@ namespace ProcSkinAnim.Demo
             var bones = new GPUBone[instancesCount * boneCount];
             var rot = transform.rotation;
             var scale = transform.lossyScale;
-            for(int y = 0; y < instancesCount; y++)
+            for (int y = 0; y < instancesCount; y++)
             {
                 var ioffset = y * boneCount;
-                for(int x = 0; x < boneCount; x++)
+                for (int x = 0; x < boneCount; x++)
                 {
                     var p = new Vector3(bounds.center.x, max.y - unit * x, bounds.center.z);
                     // keep world offset transform 
@@ -156,11 +156,49 @@ namespace ProcSkinAnim.Demo
             return bones;
         }
 
+        bool Check(GPUBone bone) {
+            Matrix4x4 rot = bone.rotation;
+
+            for (int i = 0; i < 16; i++) {
+                if (float.IsNaN(rot[i]) || float.IsInfinity(rot[i])) {
+                    return true;
+                }
+            }
+
+            return false;
+        } 
+
+        bool Check(GPUTrail tr) {
+            Vector3 t = tr.tangent, n = tr.normal, bn = tr.binormal;
+            if (
+                float.IsNaN(t.x) || float.IsNaN(t.y) || float.IsNaN(t.z) ||
+                float.IsNaN(n.x) || float.IsNaN(n.y) || float.IsNaN(n.z) ||
+                float.IsNaN(bn.x) || float.IsNaN(bn.y) || float.IsNaN(bn.z) ||
+                t.sqrMagnitude <= 0f || n.sqrMagnitude <= 0f || bn.sqrMagnitude <= 0f ||
+                t.magnitude <= 0f || n.magnitude <= 0f || bn.magnitude <= 0f
+            ) {
+                return true;
+            }
+            return false;
+        }
+
         protected override void OnDrawGizmosSelected ()
         {
             if (trailBuffer == null) return;
 
             Gizmos.matrix = transform.localToWorldMatrix;
+
+            bool test = false;
+
+            var bones = new GPUBone[boneBuffer.count];
+            boneBuffer.GetData(bones);
+            for (int i = 0, n = bones.Length; i < n; i++) {
+                var bone = bones[i];
+                if (Check(bone)) {
+                    test = true;
+                    // Debug.Log(bone.rotation);
+                }
+            }
 
             var trails = new GPUTrail[trailBuffer.count];
             trailBuffer.GetData(trails);
@@ -176,17 +214,20 @@ namespace ProcSkinAnim.Demo
                     var next = trails[index + 1];
 
                     Gizmos.color = Color.white;
+
                     Gizmos.DrawLine(cur.position, next.position);
                     Gizmos.DrawWireSphere(cur.position, 0.1f);
 
                     Gizmos.color = Color.green;
-                    // var tangent = cur.rotation * Vector3.up;
-                    var tangent = cur.tangent;
-                    Gizmos.DrawLine(cur.position, cur.position + tangent * length);
-                    // var normal = cur.rotation * Vector3.right;
-                    var normal = cur.normal;
+                    Vector3 t = cur.tangent, n = cur.normal, bn = cur.binormal;
+
+                    if (Check(cur) || Check(next)) {
+                        Debug.Log(t);
+                    }
+
+                    Gizmos.DrawLine(cur.position, cur.position + t * length);
                     Gizmos.color = Color.red;
-                    Gizmos.DrawLine(cur.position, cur.position + normal * length);
+                    Gizmos.DrawLine(cur.position, cur.position + n * length);
                 }
             }
         }

@@ -224,6 +224,12 @@ float4x4 extract_rotation_matrix(float4x4 m)
     float invSY = 1.0 / sy;
     float invSZ = 1.0 / sz;
 
+    /*
+    float invSX = (sx == 0) ? 0.0 : 1.0 / sx;
+    float invSY = (sy == 0) ? 0.0 : 1.0 / sy;
+    float invSZ = (sz == 0) ? 0.0 : 1.0 / sz;
+    */
+
     m[0][0] *= invSX;
     m[0][1] *= invSX;
     m[0][2] *= invSX;

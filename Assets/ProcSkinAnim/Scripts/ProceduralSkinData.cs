@@ -7,7 +7,6 @@ namespace ProcSkinAnim
 
     public struct GPUBone {
         public Vector3 position;
-        // public Quaternion rotation;
         public Matrix4x4 rotation;
         public Vector3 scale;
 

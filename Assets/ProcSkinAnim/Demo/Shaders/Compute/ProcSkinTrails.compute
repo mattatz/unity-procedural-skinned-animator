@@ -12,6 +12,7 @@
 #include "../../../Shaders/Common/Random.cginc"
 #include "../../../Shaders/Common/Matrix.cginc"
 #include "../../../Shaders/Common/Quaternion.cginc"
+// #include "../../../Shaders/Common/Noise/SimplexNoise3D.cginc"
 #include "../../../Shaders/Common/Noise/SimplexNoiseGrad3D.cginc"
 #include "../../../Shaders/Common/ProcSkinAnim.cginc"
 #include "../Common/Trail.cginc"
@@ -34,6 +35,7 @@ float2 _DT;
 
 float3 _NoiseOffset, _NoiseParams;
 half2 _Damper;
+
 half3 _Gravity;
 
 GPUTrail Create(int i)
@@ -63,8 +65,58 @@ void Setup (uint3 id : SV_DispatchThreadID)
     }
 }
 
+/*
+
+// Divergence-free noise field
+float3 NoiseField(uint id, float3 p)
+{
+    p += float3(0.9, 1.0, 1.1) * (10.0 * id);
+    float3 n1 = snoise(p).xyz;
+    float3 n2 = snoise(p + float3(15.3, 13.1, 17.4)).xyz;
+    return cross(n1, n2);
+}
+
+void Floating(int index)
+{
+    float3 p_prev = _Trails[index].position.xyz;
+    int i;
+    for (i = 1; i < _BonesCount; i++)
+    {
+        float3 np = (p_prev + _NoiseOffset) * 0.5;
+        float3 v = NoiseField(index, np) * 0.5;
+        float3 p_update = p_prev + v * _DT.x;
+
+        p_prev = _Trails[index + i].position.xyz;
+        _Trails[index + i].position.xyz = p_update;
+    }
+
+    // Retrieve the previous position and velocity.
+    GPUTrail head = _Trails[index];
+    float3 p = head.position.xyz;
+    float3 v = head.velocity.xyz;
+
+    // Force from the attactor.
+
+    // Force from the noise field.
+    float3 np = (p + _NoiseOffset) * 0.5;
+    float3 f_n = NoiseField(index, np) * 0.5;
+
+    // Apply drag and acceleration force.
+    v = v * _Damper.x + (f_n) * _DT.x;
+
+    // Update the head position.
+    p += v * _DT.x;
+
+    head.position.xyz = p;
+    head.velocity.xyz = v;
+    _Trails[index] = head;
+}
+*/
+
 void Sequence(int index)
 {
+    // Floating(index);
+
     int i;
     for (i = 1; i < _BonesCount; i++)
     {
@@ -100,13 +152,12 @@ void Sequence(int index)
         float3 n1 = normalize(cross(b0, t1));
 
         GPUTrail cur = _Trails[index + i];
-        // cur.rotation = q_look_at(n1, t1);
         cur.normal = n1;
         cur.tangent = t1;
         cur.binormal = b0;
         _Trails[index + i] = cur;
 
-        b0 = cross(t1, n1);
+        b0 = normalize(cross(t1, n1));
     }
 
     GPUTrail tail = _Trails[index + _BonesCount - 1];
@@ -117,7 +168,6 @@ void Sequence(int index)
     float3 t1 = normalize(p1 - p0);
     float3 n1 = normalize(cross(b0, t1));
 
-    // tail.rotation = q_look_at(n1, t1);
     tail.normal = n1;
     tail.tangent = t1;
     tail.binormal = b0;
@@ -159,6 +209,11 @@ void Update (uint3 id : SV_DispatchThreadID)
     Sequence(index);
 }
 
+float4x4 MakeRotationMatrix(GPUTrail tr)
+{
+    return axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal));
+}
+
 THREAD
 void Apply (uint3 id : SV_DispatchThreadID)
 {
@@ -166,13 +221,6 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
     float4x4 moffset = _LocalToWorld;
     int ioffset = id.x * _BonesCount;
-
-    // debug
-    /*
-    GPUBone root = _Bones[ioffset];
-    root.position.xyz = float3(id.x / 4, 0, id.x % 4);
-    _Bones[ioffset] = root;
-    */
 
     for (int i = 0; i < _BonesCount; i++) {
         int index = ioffset + i;
@@ -189,16 +237,12 @@ void Apply (uint3 id : SV_DispatchThreadID)
         float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
 
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
-        // float4x4 rotation = mul(conv, look_at_matrix(tr.normal, tr.tangent));
-        // float4x4 rotation = mul(conv, axis_matrix(cross(tr.normal, tr.tangent), tr.normal, tr.tangent));
-        // float4x4 rotation = mul(conv, axis_matrix(-cross(tr.normal, tr.tangent), tr.normal, tr.tangent));
-        float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
+        // float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
+        float4x4 rotation = mul(conv, MakeRotationMatrix(tr));
         // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1)));
 
         bone.position = translation;
         bone.rotation = extract_rotation_matrix(rotation);
-
-        // bone.rotation = rotate_angle_axis(sin(_Time.x) * PI, float3(0, 1, 0)); // success
 
         _Bones[index] = bone;
 
