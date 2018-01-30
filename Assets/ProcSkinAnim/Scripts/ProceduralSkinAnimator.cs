@@ -54,7 +54,7 @@ namespace ProcSkinAnim
             setupKernel = new Kernel(compute, "Setup");
             applyKernel = new Kernel(compute, "Apply");
 
-            // bind initial matrix for bones
+            // Bind initial matrices for bones.
             material.SetMatrix(kBindMatrixKey, transform.localToWorldMatrix);
             material.SetMatrix(kBindMatrixInvKey, transform.worldToLocalMatrix);
 
@@ -80,6 +80,7 @@ namespace ProcSkinAnim
             compute.SetBuffer(kernel.Index, kBonesKey, boneBuffer);
             compute.SetInt(kBonesCountKey, boneCount);
             compute.SetFloat(kBonesCountInvKey, 1f / boneCount);
+
             var t = Time.timeSinceLevelLoad;
             compute.SetVector(kTimeKey, new Vector4(t / 20f, t, t * 2f, t * 3f));
             compute.SetVector(kDTKey, new Vector2(dt, (dt < float.Epsilon) ? 0f : 1f / dt));

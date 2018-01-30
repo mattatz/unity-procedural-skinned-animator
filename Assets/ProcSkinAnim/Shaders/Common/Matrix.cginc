@@ -156,40 +156,17 @@ void decompose(in float4x4 m, out float3 position, out float4 rotation, out floa
     scale.z = sz;
 }
 
-float4x4 look_at_matrix(float3 at, float3 eye, float3 up)
+float4x4 axis_matrix(float3 right, float3 up, float3 forward)
 {
-    float3 zaxis = normalize(at - eye);
-    float3 xaxis = normalize(cross(up, zaxis));
-    float3 yaxis = cross(zaxis, xaxis);
-    float dx = -dot(xaxis, eye);
-    float dy = -dot(yaxis, eye);
-    float dz = -dot(zaxis, eye);
-    return float4x4(
-		xaxis.x, yaxis.x, zaxis.x, 0,
-		xaxis.y, yaxis.y, zaxis.y, 0,
-		xaxis.z, yaxis.z, zaxis.z, 0,
-		// dx, dy, dz, 1
-		0, 0, 0, 1
-	);
-}
-
-float4x4 _construct_axis_matrix(float3 xaxis, float3 yaxis, float3 zaxis)
-{
+    float3 xaxis = right;
+    float3 yaxis = up;
+    float3 zaxis = forward;
     return float4x4(
 		xaxis.x, yaxis.x, zaxis.x, 0,
 		xaxis.y, yaxis.y, zaxis.y, 0,
 		xaxis.z, yaxis.z, zaxis.z, 0,
 		0, 0, 0, 1
 	);
-
-    /*
-    return float4x4(
-		xaxis.x, xaxis.y, xaxis.z, 0,
-		yaxis.x, yaxis.y, yaxis.z, 0,
-		zaxis.x, zaxis.y, zaxis.z, 0,
-		0, 0, 0, 1
-	);
-    */
 }
 
 // http://stackoverflow.com/questions/349050/calculating-a-lookat-matrix
@@ -198,15 +175,15 @@ float4x4 look_at_matrix(float3 forward, float3 up)
     float3 xaxis = normalize(cross(forward, up));
     float3 yaxis = up;
     float3 zaxis = forward;
-    return _construct_axis_matrix(xaxis, yaxis, zaxis);
+    return axis_matrix(xaxis, yaxis, zaxis);
 }
 
-float4x4 axis_matrix(float3 right, float3 up, float3 forward)
+float4x4 look_at_matrix(float3 at, float3 eye, float3 up)
 {
-    float3 xaxis = right;
-    float3 yaxis = up;
-    float3 zaxis = forward;
-    return _construct_axis_matrix(xaxis, yaxis, zaxis);
+    float3 zaxis = normalize(at - eye);
+    float3 xaxis = normalize(cross(up, zaxis));
+    float3 yaxis = cross(zaxis, xaxis);
+    return axis_matrix(xaxis, yaxis, zaxis);
 }
 
 float4x4 extract_rotation_matrix(float4x4 m)

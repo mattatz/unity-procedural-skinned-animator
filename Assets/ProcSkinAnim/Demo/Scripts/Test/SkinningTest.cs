@@ -89,7 +89,7 @@ namespace ProcSkinAnim.Demo
                     bone.transform.localPosition = new Vector3(0, -unit, 0);
                 }
 
-                // keep global initial transform
+                // keep local and global initial transform
                 locals.Add(new TRS(bone.transform.localPosition, bone.transform.localRotation, bone.transform.localScale));
                 globals.Add(new TRS(bone.transform));
             }
@@ -165,11 +165,31 @@ namespace ProcSkinAnim.Demo
         {
             if (bones == null) return;
 
+            /*
             bones.ForEach(bone =>
             {
                 Gizmos.matrix = bone.localToWorldMatrix;
                 Gizmos.DrawWireCube(Vector3.zero, Vector3.one * 0.045f);
             });
+            */
+
+#if UNITY_EDITOR
+
+            GUIStyle style = new GUIStyle();
+            style.fontSize = 30;
+
+            for (int i = 0, n = bones.Count; i < n; i++) {
+                var b0 = bones[i];
+                UnityEditor.Handles.SphereHandleCap(0, b0.position, b0.rotation, 0.05f, EventType.Repaint);
+                UnityEditor.Handles.Label(b0.position, i.ToString(), style);
+                if (i < n - 1) {
+                    var b1 = bones[i + 1];
+                    UnityEditor.Handles.DrawLine(b0.position, b1.position);
+                }
+            }
+
+#endif
+
         }
 
     }

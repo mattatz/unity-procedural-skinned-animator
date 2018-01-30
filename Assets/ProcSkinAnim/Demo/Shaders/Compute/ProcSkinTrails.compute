@@ -72,10 +72,9 @@ void Setup (uint3 id : SV_DispatchThreadID)
     }
 }
 
+// Move header of Trails.
 void Header(int index)
 {
-    // Move header of Trails.
-
     GPUTrail head = _Trails[index];
 
     float3 v = head.velocity;
@@ -95,16 +94,15 @@ void Header(int index)
     v.xyz = v.xyz * min(lv, _Damper.y) / lv;
 
     head.position.xyz += v.xyz * _DT.x;
-    // head.position.xyz += float3(0, sin(_Time.x) * 0.01, 0);
 
     _Trails[index] = head;
 }
 
 void Sequence(int index)
 {
-    // 
-
     int i;
+
+    // Children trails Follow a header trail.
     float dt = _DT.x * _TrailFollowIntensity;
     for (i = 1; i < _BonesCount; i++)
     {
@@ -121,6 +119,7 @@ void Sequence(int index)
 
     // Calcuate sequencial TNB vectors.
 
+    // Calculate a head TNB.
     GPUTrail head = _Trails[index];
     float3 p0 = head.position.xyz;
     float3 p1 = _Trails[index + 1].position.xyz;
@@ -134,6 +133,7 @@ void Sequence(int index)
     head.binormal = b0;
     _Trails[index] = head;
 
+    // Calculate children TNBs.
     for (i = 1; i < _BonesCount - 1; i++)
     {
         p0 = _Trails[index + i - 1].position.xyz;
@@ -151,6 +151,7 @@ void Sequence(int index)
         b0 = normalize(cross(t1, n1));
     }
 
+    // Calculate a tail TNB.
     GPUTrail tail = _Trails[index + _BonesCount - 1];
 
     p0 = _Trails[index + _BonesCount - 2].position.xyz;
@@ -183,7 +184,6 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
     float4x4 moffset = _LocalToWorld;
     int ioffset = id.x * _BonesCount;
-
     for (int i = 0; i < _BonesCount; i++) {
         int index = ioffset + i;
         GPUBone bone = _Bones[index];
@@ -192,18 +192,16 @@ void Apply (uint3 id : SV_DispatchThreadID)
         // Copy position and rotation from GPUTrail to GPUBone
 
         // global to local
-        // float3 local = mul(inverse(moffset), mul(_LocalToWorld, float4(tr.position, 1))).xyz;
-        // local = mul(inverse(bone.local), float4(local.xyz, 1)).xyz;
 
         // float4x4 conv = mul(mul(_LocalToWorld, inverse(moffset)), inverse(bone.local));
         float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
 
+        // Calculate transform in local space.
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
         float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
         // float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
-        // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1))); // debug
 
-        // set diff TR in local space
+        // Set diff TR in local space
         bone.position = translation;
         bone.rotation = extract_rotation_matrix(rotation);
 
