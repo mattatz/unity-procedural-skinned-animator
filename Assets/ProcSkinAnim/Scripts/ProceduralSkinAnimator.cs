@@ -52,7 +52,6 @@ namespace ProcSkinAnim
             material.SetFloat(kBonesCountInvKey, 1f / boneCount);
 
             setupKernel = new Kernel(compute, "Setup");
-            updateKernel = new Kernel(compute, "Update");
             applyKernel = new Kernel(compute, "Apply");
 
             // bind initial matrix for bones
@@ -60,14 +59,12 @@ namespace ProcSkinAnim
             material.SetMatrix(kBindMatrixInvKey, transform.worldToLocalMatrix);
 
             Compute(setupKernel, 0f);
-            Compute(updateKernel, Time.deltaTime);
         }
 
         protected abstract GPUBoneWeight[] BuildWeights();
         protected abstract GPUBone[] BuildBones();
         
         protected virtual void Update () {
-            Compute(updateKernel, Time.deltaTime);
             Compute(applyKernel, Time.deltaTime);
 
             material.SetMatrix(kBindMatrixInvKey, transform.worldToLocalMatrix);

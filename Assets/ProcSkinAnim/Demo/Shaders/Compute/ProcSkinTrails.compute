@@ -9,6 +9,7 @@
 #define PI 3.14159265359
 #endif
 
+#include "UnityCG.cginc"
 #include "../../../Shaders/Common/Random.cginc"
 #include "../../../Shaders/Common/Matrix.cginc"
 #include "../../../Shaders/Common/Quaternion.cginc"
@@ -17,26 +18,32 @@
 #include "../../../Shaders/Common/ProcSkinAnim.cginc"
 #include "../Common/Trail.cginc"
 
-int _InstancesCount;
 RWStructuredBuffer<GPUBone> _Bones;
 RWStructuredBuffer<GPUTrail> _Trails;
 
-int _BonesCount;
-float _BonesCountInv;
+CBUFFER_START(Params)
 
-float4x4 _BindMatrix, _BindMatrixInv;
-float4x4 _WorldToLocal, _LocalToWorld;
+    int _InstancesCount;
 
-float3 _Max, _Min, _Center;
-float _UnitLength;
+    int _BonesCount;
+    float _BonesCountInv;
 
-float4 _Time;
-float2 _DT;
+    float4x4 _WorldToLocal, _LocalToWorld;
 
-float3 _NoiseOffset, _NoiseParams;
-half2 _Damper;
+    float3 _Max, _Min, _Center;
+    float _UnitLength;
 
-half3 _Gravity;
+    half _TrailFollowIntensity;
+    half2 _TrailFollowDelay;
+
+    float2 _DT;
+
+    float3 _NoiseOffset, _NoiseParams;
+    half2 _Damper;
+
+    half3 _Gravity;
+
+CBUFFER_END
 
 GPUTrail Create(int i)
 {
@@ -98,6 +105,7 @@ void Sequence(int index)
     // 
 
     int i;
+    float dt = _DT.x * _TrailFollowIntensity;
     for (i = 1; i < _BonesCount; i++)
     {
         GPUTrail parent = _Trails[index + i - 1];
@@ -105,7 +113,8 @@ void Sequence(int index)
 
         float3 dir = parent.position - child.position;
         float l = length(dir);
-        child.position = lerp(child.position, child.position + step(_UnitLength, l) * dir, _DT.x);
+        float t = 1.0 - i * _BonesCountInv;
+        child.position = lerp(child.position, child.position + step(_UnitLength, l) * dir, dt * lerp(_TrailFollowDelay.x, _TrailFollowDelay.y, t));
 
         _Trails[index + i] = child;
     }
@@ -191,7 +200,6 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
         float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
-
         // float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
         // float4x4 rotation = mul(conv, axis_matrix(float3(1, 0, 0), float3(0, 1, 0), float3(0, 0, 1))); // debug
 

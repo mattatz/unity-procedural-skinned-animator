@@ -15,6 +15,8 @@ namespace ProcSkinAnim.Demo
         #region Particle properties
 
         [SerializeField] protected float speed = 1f;
+        [SerializeField] protected float trailFollowIntensity = 3.0f;
+        [SerializeField, Range(0f, 1f)] protected float trailFollowDelayMin = 0.1f, trailFollowDelayMax = 1.0f;
         [SerializeField] protected float speedScaleMin = 2.0f, speedScaleMax = 5.0f;
         [SerializeField] protected float speedLimit = 1.0f;
         [SerializeField, Range(0, 15)] protected float drag = 0.1f;
@@ -35,10 +37,14 @@ namespace ProcSkinAnim.Demo
         protected const string kTrailsKey = "_Trails", kTrailsCountKey = "_TrailsCount";
         protected const string kMaxKey = "_Max", kMinKey = "_Min", kCenterKey = "_Center", kUnitLengthKey = "_UnitLength";
 
+        protected const string kTrailFollowIntensityKey = "_TrailFollowIntensity";
+        protected const string kTrailFollowDelayKey = "_TrailFollowDelay";
+
         protected const string kSpeedKey = "_Speed";
         protected const string kDamperKey = "_Damper";
         protected const string kGravityKey = "_Gravity";
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
+
         #endregion
 
         protected override void Start()
@@ -84,8 +90,8 @@ namespace ProcSkinAnim.Demo
             trailCompute.SetMatrix(kWorldToLocalKey, transform.worldToLocalMatrix);
             trailCompute.SetMatrix(kLocalToWorldKey, transform.localToWorldMatrix);
 
-            trailCompute.SetMatrix(kBindMatrixKey, material.GetMatrix(kBindMatrixKey));
-            trailCompute.SetMatrix(kBindMatrixInvKey, material.GetMatrix(kBindMatrixInvKey));
+            trailCompute.SetFloat(kTrailFollowIntensityKey, trailFollowIntensity);
+            trailCompute.SetVector(kTrailFollowDelayKey, new Vector2(trailFollowDelayMin, trailFollowDelayMax));
 
             trailCompute.SetVector(kDamperKey, new Vector2(Mathf.Exp(-drag * dt), speedLimit));
             trailCompute.SetVector(kGravityKey, gravity * dt);
@@ -102,14 +108,21 @@ namespace ProcSkinAnim.Demo
         {
             var bounds = mesh.bounds;
             Vector3 min = bounds.min, max = bounds.max;
-            var unit = (max.y - min.y) / (boneCount - 1);
+
+            // To avoid bind a head bone to vertices, set followingBoneCount to boneCount - 2.
+            var followingBoneCount = boneCount - 2;
+
+            var unit = (max.y - min.y) / followingBoneCount;
             var vertices = mesh.vertices;
 
             var weights = new GPUBoneWeight[mesh.vertexCount];
             for (int i = 0, n = vertices.Length; i < n; i++)
             {
                 var p = vertices[i];
-                var u = (boneCount - 1) - ((p.y - min.y) / unit);
+
+                // 1f offset avoids binding a head bone.
+                var u = 1f + followingBoneCount - ((p.y - min.y) / unit);
+
                 if (u > 0f)
                 {
                     var lu = Mathf.FloorToInt(u);
@@ -156,48 +169,14 @@ namespace ProcSkinAnim.Demo
             return bones;
         }
 
-        bool Check(GPUBone bone) {
-            Matrix4x4 rot = bone.rotation;
-
-            for (int i = 0; i < 16; i++) {
-                if (float.IsNaN(rot[i]) || float.IsInfinity(rot[i])) {
-                    return true;
-                }
-            }
-
-            return false;
-        } 
-
-        bool Check(GPUTrail tr) {
-            Vector3 t = tr.tangent, n = tr.normal, bn = tr.binormal;
-            if (
-                float.IsNaN(t.x) || float.IsNaN(t.y) || float.IsNaN(t.z) ||
-                float.IsNaN(n.x) || float.IsNaN(n.y) || float.IsNaN(n.z) ||
-                float.IsNaN(bn.x) || float.IsNaN(bn.y) || float.IsNaN(bn.z) ||
-                t.sqrMagnitude <= 0f || n.sqrMagnitude <= 0f || bn.sqrMagnitude <= 0f ||
-                t.magnitude <= 0f || n.magnitude <= 0f || bn.magnitude <= 0f
-            ) {
-                return true;
-            }
-            return false;
-        }
-
         protected override void OnDrawGizmosSelected ()
         {
             if (trailBuffer == null) return;
+            // DrawTrailGizmos();
+        }
 
+        void DrawTrailGizmos() {
             Gizmos.matrix = transform.localToWorldMatrix;
-
-            /*
-            var bones = new GPUBone[boneBuffer.count];
-            boneBuffer.GetData(bones);
-            for (int i = 0, n = bones.Length; i < n; i++) {
-                var bone = bones[i];
-                if (Check(bone)) {
-                    // Debug.Log(bone.rotation);
-                }
-            }
-            */
 
             var trails = new GPUTrail[trailBuffer.count];
             trailBuffer.GetData(trails);
@@ -210,10 +189,9 @@ namespace ProcSkinAnim.Demo
                 for (int x = 0; x < boneCount - 1; x++) {
                     int index = x + offset;
                     var cur = trails[index];
-                    var next = trails[index + 1];
-
                     Gizmos.color = Color.white;
 
+                    // var next = trails[index + 1];
                     // Gizmos.DrawLine(cur.position, next.position);
                     Gizmos.DrawWireSphere(cur.position, size);
 
@@ -226,6 +204,7 @@ namespace ProcSkinAnim.Demo
                     Gizmos.DrawLine(cur.position, cur.position + b * length);
                 }
             }
+
 
         }
  

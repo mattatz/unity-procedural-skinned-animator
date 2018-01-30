@@ -1,5 +1,4 @@
 ﻿#pragma kernel Setup
-#pragma kernel Update
 #pragma kernel Apply
 
 #define THREAD [numthreads(8, 1, 1)]
@@ -9,21 +8,26 @@
 #define PI 3.14159265359
 #endif
 
+#include "UnityCG.cginc"
 #include "../Common/Random.cginc"
 #include "../Common/Matrix.cginc"
 #include "../Common/Quaternion.cginc"
 #include "../Common/Noise/SimplexNoiseGrad3D.cginc"
 #include "../Common/ProcSkinAnim.cginc"
 
-int _InstancesCount;
 RWStructuredBuffer<GPUBone> _Bones;
-int _BonesCount;
-float _BonesCountInv;
 
-float4x4 _WorldToLocal, _LocalToWorld;
+CBUFFER_START(Params)
 
-float4 _Time;
-float2 _DT;
+    int _InstancesCount;
+    int _BonesCount;
+    float _BonesCountInv;
+
+    float4x4 _WorldToLocal, _LocalToWorld;
+
+    float2 _DT;
+
+CBUFFER_END
 
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
@@ -32,15 +36,6 @@ void Setup (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
-/*
-    // for debug
-    GPUBone root = _Bones[index];
-    root.position.x = id.x % 8;
-    root.position.y = id.x / 64;
-    root.position.z = (id.x / 8) % 8;
-    _Bones[index] = root;
-*/
-
     float4x4 offset = _WorldToLocal;
 
     for (int i = 0; i < _BonesCount; i++) {
@@ -48,20 +43,12 @@ void Setup (uint3 id : SV_DispatchThreadID)
         GPUBone bone = _Bones[index + i];
 
         // convert global initial to local space 
-        // bone.local = mul(bone.local, offset); // fail
-
-        bone.local = mul(offset, bone.local); // success
+        bone.local = mul(offset, bone.local);
 
         _Bones[index + i] = bone;
 
         offset = bone.offset; // with hierarchy
     }
-}
-
-THREAD
-void Update (uint3 id : SV_DispatchThreadID)
-{
-    DISCARD
 }
 
 THREAD
@@ -79,13 +66,11 @@ void Apply (uint3 id : SV_DispatchThreadID)
         GPUBone bone = _Bones[index + i];
 
         float4x4 diff = GetBoneMatrix(bone);
-        // offset = mul(offset, mul(bone.local, diff));
         offset = mul(offset, mul(diff, bone.local));
 
-        bone.comb = mul(offset, bone.offset); // with hierarchy ver.
-        // bone.comb = mul(mul(offset, mul(bone.local, GetBoneMatrix(bone))), bone.offset); // without hierarchy ver
+        bone.comb = mul(offset, bone.offset); // with hierarchy.
+        // bone.comb = mul(mul(offset, mul(bone.local, GetBoneMatrix(bone))), bone.offset); // without hierarchy.
 
         _Bones[index + i] = bone;
     }
-
 }
