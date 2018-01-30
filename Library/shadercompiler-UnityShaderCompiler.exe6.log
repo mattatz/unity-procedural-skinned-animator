@@ -6,3 +6,25 @@ Cmd: compileComputeKernel
   api=4 insize=6740 outsize=12973 ok=1
 Cmd: compileComputeKernel
   api=4 insize=6918 outsize=13573 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5365 outsize=1537 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5676 outsize=11653 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5684 outsize=11233 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5788 outsize=13573 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5873 outsize=11449 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5876 outsize=11233 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5912 outsize=12861 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5682 outsize=11473 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5682 outsize=13573 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5534 outsize=13573 ok=1
+Cmd: compileComputeKernel
+  api=4 insize=5531 outsize=11709 ok=1

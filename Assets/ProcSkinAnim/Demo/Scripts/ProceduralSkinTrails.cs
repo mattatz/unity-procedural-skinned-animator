@@ -114,7 +114,7 @@ namespace ProcSkinAnim.Demo
                 {
                     var lu = Mathf.FloorToInt(u);
                     var cu = Mathf.CeilToInt(u);
-                    var t = u - lu;
+                    var t = Mathf.Clamp01(u - lu);
 
                     weights[i].boneIndex0 = (uint)lu;
                     weights[i].weight0 = 1f - t;
@@ -124,9 +124,9 @@ namespace ProcSkinAnim.Demo
                 {
                     // tip case (u <= 0f)
                     weights[i].boneIndex0 = 0;
-                    weights[i].weight0 = 1;
-                    weights[i].boneIndex1 = 1;
-                    weights[i].weight1 = 0;
+                    weights[i].weight0 = 1f;
+                    weights[i].boneIndex1 = 0;
+                    weights[i].weight1 = 0f;
                 }
             }
             return weights;
@@ -199,7 +199,6 @@ namespace ProcSkinAnim.Demo
             }
             */
 
-            /*
             var trails = new GPUTrail[trailBuffer.count];
             trailBuffer.GetData(trails);
 
@@ -215,18 +214,19 @@ namespace ProcSkinAnim.Demo
 
                     Gizmos.color = Color.white;
 
-                    Gizmos.DrawLine(cur.position, next.position);
-                    Gizmos.DrawWireSphere(cur.position, 0.1f);
+                    // Gizmos.DrawLine(cur.position, next.position);
+                    Gizmos.DrawWireSphere(cur.position, size);
 
+                    Vector3 t = cur.tangent, n = cur.normal, b = cur.binormal;
                     Gizmos.color = Color.green;
-                    Vector3 t = cur.tangent, n = cur.normal, bn = cur.binormal;
-
                     Gizmos.DrawLine(cur.position, cur.position + t * length);
                     Gizmos.color = Color.red;
                     Gizmos.DrawLine(cur.position, cur.position + n * length);
+                    Gizmos.color = Color.blue;
+                    Gizmos.DrawLine(cur.position, cur.position + b * length);
                 }
             }
-            */
+
         }
  
         protected override void OnDestroy()

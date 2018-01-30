@@ -173,18 +173,15 @@ float4x4 look_at_matrix(float3 at, float3 eye, float3 up)
 	);
 }
 
-// http://stackoverflow.com/questions/349050/calculating-a-lookat-matrix
-float4x4 look_at_matrix(float3 forward, float3 up)
+float4x4 _construct_axis_matrix(float3 xaxis, float3 yaxis, float3 zaxis)
 {
-    float3 xaxis = normalize(cross(forward, up));
-    float3 yaxis = up;
-    float3 zaxis = forward;
     return float4x4(
 		xaxis.x, yaxis.x, zaxis.x, 0,
 		xaxis.y, yaxis.y, zaxis.y, 0,
 		xaxis.z, yaxis.z, zaxis.z, 0,
 		0, 0, 0, 1
 	);
+
     /*
     return float4x4(
 		xaxis.x, xaxis.y, xaxis.z, 0,
@@ -195,17 +192,21 @@ float4x4 look_at_matrix(float3 forward, float3 up)
     */
 }
 
+// http://stackoverflow.com/questions/349050/calculating-a-lookat-matrix
+float4x4 look_at_matrix(float3 forward, float3 up)
+{
+    float3 xaxis = normalize(cross(forward, up));
+    float3 yaxis = up;
+    float3 zaxis = forward;
+    return _construct_axis_matrix(xaxis, yaxis, zaxis);
+}
+
 float4x4 axis_matrix(float3 right, float3 up, float3 forward)
 {
     float3 xaxis = right;
     float3 yaxis = up;
     float3 zaxis = forward;
-    return float4x4(
-		xaxis.x, yaxis.x, zaxis.x, 0,
-		xaxis.y, yaxis.y, zaxis.y, 0,
-		xaxis.z, yaxis.z, zaxis.z, 0,
-		0, 0, 0, 1
-	);
+    return _construct_axis_matrix(xaxis, yaxis, zaxis);
 }
 
 float4x4 extract_rotation_matrix(float4x4 m)
@@ -223,12 +224,6 @@ float4x4 extract_rotation_matrix(float4x4 m)
     float invSX = 1.0 / sx;
     float invSY = 1.0 / sy;
     float invSZ = 1.0 / sz;
-
-    /*
-    float invSX = (sx == 0) ? 0.0 : 1.0 / sx;
-    float invSY = (sy == 0) ? 0.0 : 1.0 / sy;
-    float invSZ = (sz == 0) ? 0.0 : 1.0 / sz;
-    */
 
     m[0][0] *= invSX;
     m[0][1] *= invSX;
