@@ -54,7 +54,7 @@ GPUTrail Create(int id, int i)
     tr.normal = float3(0, 0, 1);
     tr.tangent = float3(0, 1, 0);
     tr.binormal = float3(1, 0, 0);
-    tr.speed = lerp(_SpeedRange.x, _SpeedRange.y, nrand(float2(id, 0)));
+    tr.speed = lerp(_SpeedRange.x, _SpeedRange.y, abs(nrand(float2(id, 0))));
     return tr;
 }
 

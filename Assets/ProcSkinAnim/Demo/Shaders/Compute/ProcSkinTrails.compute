@@ -34,8 +34,7 @@ void Header(int index)
     float3 np = (seed + _NoiseOffset) * _NoiseParams.x;
     float3 n1 = snoise_grad(np);
     float3 n2 = snoise_grad(np + float3(21.83, 13.28, 7.32));
-    v.xyz += cross(n1, n2) * _NoiseParams.y;
-    v.xyz *= head.speed;
+    v.xyz += cross(n1, n2) * _NoiseParams.y * head.speed;
 
     head.velocity = v;
 

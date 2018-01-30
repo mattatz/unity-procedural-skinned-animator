@@ -310,7 +310,7 @@ MonoBehaviour:
   trailFollowDelayMin: 0.1
   trailFollowDelayMax: 1
   speedLimit: 1
-  speedMin: 0.5
+  speedMin: 0.725
   speedMax: 1
   drag: 0.1
   gravity: {x: 0, y: 0.01, z: 0}
