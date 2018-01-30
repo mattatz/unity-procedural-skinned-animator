@@ -63,7 +63,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
-    float3 offset = random_point_on_sphere(id.xy);
+    float3 offset = random_point_on_sphere(id.xy) * 3.0;
 
     for (int i = 0; i < _BonesCount; i++) {
         GPUTrail tr = Create(i);
@@ -198,8 +198,8 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
         // Calculate transform in local space.
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
-        float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
-        // float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
+        // float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
+        float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
 
         // Set diff TR in local space
         bone.position = translation;

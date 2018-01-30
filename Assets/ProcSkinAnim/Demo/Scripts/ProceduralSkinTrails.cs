@@ -12,14 +12,14 @@ namespace ProcSkinAnim.Demo
 
     public class ProceduralSkinTrails : ProceduralSkinAnimator {
 
-        #region Particle properties
+        #region Trail properties
 
+        [SerializeField] protected ComputeShader trailCompute;
         [SerializeField] protected float speed = 1f;
-        [SerializeField] protected float trailFollowIntensity = 3.0f;
+        [SerializeField, Range(0f, 5f)] protected float trailFollowIntensity = 3.0f;
         [SerializeField, Range(0f, 1f)] protected float trailFollowDelayMin = 0.1f, trailFollowDelayMax = 1.0f;
-        [SerializeField] protected float speedScaleMin = 2.0f, speedScaleMax = 5.0f;
         [SerializeField] protected float speedLimit = 1.0f;
-        [SerializeField, Range(0, 15)] protected float drag = 0.1f;
+        [SerializeField, Range(0, 1)] protected float drag = 0.1f;
         [SerializeField] protected Vector3 gravity = Vector3.zero;
         [SerializeField] protected float noiseAmplitude = 1.0f;
         [SerializeField] protected float noiseFrequency = 0.01f;
@@ -28,12 +28,11 @@ namespace ProcSkinAnim.Demo
 
         #endregion
 
-        [SerializeField] protected ComputeShader trailCompute;
-
         protected ComputeBuffer trailBuffer;
         protected Kernel setupTrailKernel, updateTrailKernel, applyTrailKernel;
 
         #region Shader property keys
+
         protected const string kTrailsKey = "_Trails", kTrailsCountKey = "_TrailsCount";
         protected const string kMaxKey = "_Max", kMinKey = "_Min", kCenterKey = "_Center", kUnitLengthKey = "_UnitLength";
 
@@ -45,6 +44,10 @@ namespace ProcSkinAnim.Demo
         protected const string kGravityKey = "_Gravity";
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
 
+        protected Vector3 min, max, center;
+        protected int followingBoneCount;
+        protected float unitLength;
+
         #endregion
 
         protected override void Start()
@@ -55,17 +58,27 @@ namespace ProcSkinAnim.Demo
             setupTrailKernel = new Kernel(trailCompute, "Setup");
             updateTrailKernel = new Kernel(trailCompute, "Update");
             applyTrailKernel = new Kernel(trailCompute, "Apply");
+            ComputeTrails(setupTrailKernel, 0f);
+        }
 
+        protected void CheckInit()
+        {
+            if (unitLength > 0f) return;
+
+            // Setup bone structure data
             var bounds = mesh.bounds;
-            Vector3 min = bounds.min, max = bounds.max;
-            var unit = (max.y - min.y) / (boneCount - 1);
+            min = bounds.min;
+            max = bounds.max;
+            center = bounds.center;
+
+            // To avoid bind a head bone to vertices, set followingBoneCount to boneCount - 2.
+            followingBoneCount = boneCount - 2;
+            unitLength = (max.y - min.y) / followingBoneCount;
 
             trailCompute.SetVector(kMaxKey, max);
             trailCompute.SetVector(kMinKey, min);
-            trailCompute.SetVector(kCenterKey, bounds.center);
-            trailCompute.SetFloat(kUnitLengthKey, unit);
-
-            ComputeTrails(setupTrailKernel, 0f);
+            trailCompute.SetVector(kCenterKey, center);
+            trailCompute.SetFloat(kUnitLengthKey, unitLength);
         }
 
         protected override void Update()
@@ -76,6 +89,8 @@ namespace ProcSkinAnim.Demo
         }
 
         protected void ComputeTrails(Kernel kernel, float dt) {
+            CheckInit();
+
             dt = Mathf.Clamp(dt, 0f, 0.1f);
             trailCompute.SetInt(kInstancesCountKey, instancesCount);
             trailCompute.SetBuffer(kernel.Index, kTrailsKey, trailBuffer);
@@ -106,22 +121,16 @@ namespace ProcSkinAnim.Demo
 
         protected override GPUBoneWeight[] BuildWeights()
         {
-            var bounds = mesh.bounds;
-            Vector3 min = bounds.min, max = bounds.max;
+            CheckInit();
 
-            // To avoid bind a head bone to vertices, set followingBoneCount to boneCount - 2.
-            var followingBoneCount = boneCount - 2;
-
-            var unit = (max.y - min.y) / followingBoneCount;
             var vertices = mesh.vertices;
-
             var weights = new GPUBoneWeight[mesh.vertexCount];
             for (int i = 0, n = vertices.Length; i < n; i++)
             {
                 var p = vertices[i];
 
                 // 1f offset avoids binding a head bone.
-                var u = 1f + followingBoneCount - ((p.y - min.y) / unit);
+                var u = 1f + followingBoneCount - ((p.y - min.y) / unitLength);
 
                 if (u > 0f)
                 {
@@ -147,11 +156,9 @@ namespace ProcSkinAnim.Demo
 
         protected override GPUBone[] BuildBones()
         {
-            var bounds = mesh.bounds;
-            Vector3 min = bounds.min, max = bounds.max;
-            var unit = (max.y - min.y) / (boneCount - 1);
-            var vertices = mesh.vertices;
+            CheckInit();
 
+            var vertices = mesh.vertices;
             var bones = new GPUBone[instancesCount * boneCount];
             var rot = transform.rotation;
             var scale = transform.lossyScale;
@@ -160,7 +167,7 @@ namespace ProcSkinAnim.Demo
                 var ioffset = y * boneCount;
                 for (int x = 0; x < boneCount; x++)
                 {
-                    var p = new Vector3(bounds.center.x, max.y - unit * x, bounds.center.z);
+                    var p = new Vector3(center.x, max.y - unitLength * x, center.z);
                     // keep world offset transform 
                     bones[ioffset + x] = new GPUBone(transform.TransformPoint(p), rot, scale);
                 }
@@ -204,7 +211,6 @@ namespace ProcSkinAnim.Demo
                     Gizmos.DrawLine(cur.position, cur.position + b * length);
                 }
             }
-
 
         }
  
