@@ -19,6 +19,7 @@ namespace ProcSkinAnim.Demo
         [SerializeField, Range(0f, 5f)] protected float trailFollowIntensity = 3.0f;
         [SerializeField, Range(0f, 1f)] protected float trailFollowDelayMin = 0.1f, trailFollowDelayMax = 1.0f;
         [SerializeField] protected float speedLimit = 1.0f;
+        [SerializeField, Range(0f, 1f)] protected float speedMin = 0.5f, speedMax = 1.0f;
         [SerializeField, Range(0, 1)] protected float drag = 0.1f;
         [SerializeField] protected Vector3 gravity = Vector3.zero;
         [SerializeField] protected float noiseAmplitude = 1.0f;
@@ -39,7 +40,7 @@ namespace ProcSkinAnim.Demo
         protected const string kTrailFollowIntensityKey = "_TrailFollowIntensity";
         protected const string kTrailFollowDelayKey = "_TrailFollowDelay";
 
-        protected const string kSpeedKey = "_Speed";
+        protected const string kSpeedRangeKey = "_SpeedRange";
         protected const string kDamperKey = "_Damper";
         protected const string kGravityKey = "_Gravity";
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
@@ -108,6 +109,7 @@ namespace ProcSkinAnim.Demo
             trailCompute.SetFloat(kTrailFollowIntensityKey, trailFollowIntensity);
             trailCompute.SetVector(kTrailFollowDelayKey, new Vector2(trailFollowDelayMin, trailFollowDelayMax));
 
+            trailCompute.SetVector(kSpeedRangeKey, new Vector2(speedMin, speedMax));
             trailCompute.SetVector(kDamperKey, new Vector2(Mathf.Exp(-drag * dt), speedLimit));
             trailCompute.SetVector(kGravityKey, gravity * dt);
             trailCompute.SetVector(kNoiseParamsKey, new Vector2(noiseFrequency, noiseAmplitude * dt));

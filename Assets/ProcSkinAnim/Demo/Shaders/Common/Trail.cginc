@@ -10,6 +10,7 @@ struct GPUTrail
     float3 tangent;
     float3 binormal;
     // float4 rotation;
+    float speed;
 };
 
 #endif
