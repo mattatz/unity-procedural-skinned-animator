@@ -68,8 +68,8 @@ void Apply (uint3 id : SV_DispatchThreadID)
         float4x4 diff = GetBoneMatrix(bone);
         offset = mul(offset, mul(diff, bone.local));
 
-        bone.comb = mul(offset, bone.offset); // with hierarchy.
-        // bone.comb = mul(mul(offset, mul(bone.local, GetBoneMatrix(bone))), bone.offset); // without hierarchy.
+        bone.combined = mul(offset, bone.offset); // with hierarchy.
+        // bone.combined = mul(mul(offset, mul(bone.local, GetBoneMatrix(bone))), bone.offset); // without hierarchy.
 
         _Bones[index + i] = bone;
     }

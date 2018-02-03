@@ -4,6 +4,20 @@
 
 #include "../Common/TrailCompute.cginc"
 
+CBUFFER_START(Floating)
+
+    float4 _Attractor;
+
+CBUFFER_END
+
+// Attractor position with spread parameter
+float3 AttractorPosition(uint id)
+{
+    float u = (nrand(id, 1) + _Time.x) * PI * 2;
+    float l = nrand(id, 3);
+    return float3(cos(u), 0, sin(u)) * _Attractor.w * sqrt(l) + _Attractor.xyz;
+}
+
 THREAD
 void Setup (uint3 id : SV_DispatchThreadID)
 {
@@ -11,7 +25,7 @@ void Setup (uint3 id : SV_DispatchThreadID)
 
     int index = id.x * _BonesCount;
 
-    float3 offset = random_point_on_sphere(id.xy) * 3.0;
+    float3 offset = random_point_on_sphere(id.xy) * _Attractor.w;
 
     for (int i = 0; i < _BonesCount; i++) {
         GPUTrail tr = Create(index, i);
@@ -30,6 +44,9 @@ void Header(int index)
     // Drag 
     v.xyz = v.xyz * _Damper.x + _Gravity.xyz;
 
+    float3 dir = AttractorPosition(index) - head.position.xyz;
+    v.xyz += _DT.x * 0.1 * dir * head.speed;
+
     float3 seed = head.position.xyz;
     float3 np = (seed + _NoiseOffset) * _NoiseParams.x;
     float3 n1 = snoise_grad(np);
@@ -44,6 +61,17 @@ void Header(int index)
     head.position.xyz += v.xyz * _DT.x;
 
     _Trails[index] = head;
+}
+
+void SetTNB(inout GPUTrail tr, float3 t, float3 n, float3 b)
+{
+    float dt = _DT.x;
+    // tr.tangent = normalize(lerp(tr.tangent, t, dt));
+    // tr.normal = normalize(lerp(tr.normal, n, dt));
+    // tr.binormal = normalize(lerp(tr.binormal, b, dt));
+    tr.tangent = lerp(tr.tangent, t, dt);
+    tr.normal = lerp(tr.normal, n, dt);
+    tr.binormal = lerp(tr.binormal, b, dt);
 }
 
 void Sequence(int index)
@@ -61,7 +89,6 @@ void Sequence(int index)
         float l = length(dir);
         float t = 1.0 - i * _BonesCountInv;
 
-        // child.position = lerp(child.position, child.position + step(_UnitLength, l) * dir, dt * lerp(_TrailFollowDelay.x, _TrailFollowDelay.y, t));
         child.position = lerp(child.position, child.position + smoothstep(0, _UnitLength, l) * dir, dt * lerp(_TrailFollowDelay.x, _TrailFollowDelay.y, t));
 
         _Trails[index + i] = child;
@@ -78,9 +105,7 @@ void Sequence(int index)
     float3 b0 = normalize(cross(t0, normalize(p0)));
     float3 n0 = normalize(cross(b0, t0));
 
-    head.tangent = t0;
-    head.normal = n0;
-    head.binormal = b0;
+    SetTNB(head, t0, n0, b0);
     _Trails[index] = head;
 
     // Calculate children TNBs.
@@ -93,9 +118,8 @@ void Sequence(int index)
         float3 n1 = normalize(cross(b0, t1));
 
         GPUTrail cur = _Trails[index + i];
-        cur.tangent = t1;
-        cur.normal = n1;
-        cur.binormal = b0;
+
+        SetTNB(cur, t1, n1, b0);
         _Trails[index + i] = cur;
 
         b0 = normalize(cross(t1, n1));
@@ -110,9 +134,7 @@ void Sequence(int index)
     float3 t1 = normalize(p0 - p1);
     float3 n1 = normalize(cross(b0, t1));
 
-    tail.tangent = t1;
-    tail.normal = n1;
-    tail.binormal = b0;
+    SetTNB(tail, t1, n1, b0);
 
     _Trails[index + _BonesCount - 1] = tail;
 }
@@ -141,15 +163,13 @@ void Apply (uint3 id : SV_DispatchThreadID)
 
         // Copy position and rotation from GPUTrail to GPUBone
 
-        // global to local
-
-        // float4x4 conv = mul(mul(_LocalToWorld, inverse(moffset)), inverse(bone.local));
+        // global to local matrix
         float4x4 conv = mul(mul(inverse(bone.local), inverse(moffset)), _LocalToWorld);
 
         // Calculate transform in local space.
         float3 translation = mul(conv, float4(tr.position.xyz, 1)).xyz;
-        // float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
         float4x4 rotation = mul(conv, axis_matrix(normalize(tr.binormal), normalize(tr.tangent), normalize(tr.normal)));
+        // float4x4 rotation = mul(conv, axis_matrix(tr.binormal, tr.tangent, tr.normal));
 
         // Set diff TR in local space
         bone.position = translation;

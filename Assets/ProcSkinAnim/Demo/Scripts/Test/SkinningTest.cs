@@ -130,11 +130,10 @@ namespace ProcSkinAnim.Demo
                 // var diff = (curLocalM * local.IM);
 
                 var curGlobalM = Matrix4x4.TRS(current.transform.position, current.transform.rotation, current.transform.lossyScale);
-                // var diff = (offset.inverse * curGlobalM);
                 var diff = ((offset.inverse * curGlobalM) * local.IM);
 
                 offset = offset * (diff * local.M);
-                bone.comb = offset * global.IM;
+                bone.combined = offset * global.IM;
                 data[i] = bone;
             }
             boneBuffer.SetData(data);

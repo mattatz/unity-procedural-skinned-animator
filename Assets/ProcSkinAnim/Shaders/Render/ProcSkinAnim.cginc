@@ -36,7 +36,6 @@ float4x4 _LocalToWorld, _WorldToLocal;
 float4x4 _BindMatrix, _BindMatrixInv;
 
 UNITY_INSTANCING_BUFFER_START(Props)
-    // UNITY_DEFINE_INSTANCED_PROP(fixed4, _Color)
 UNITY_INSTANCING_BUFFER_END(Props)
 
 struct Attributes {
@@ -82,8 +81,8 @@ float3 GetSkinnedVertex(float3 pos, uint vid, uint iid) {
     float4 skinVertex = mul(_BindMatrix, float4(pos, 1));
     // float4 skinVertex = float4(pos, 1);
     float4 skinned = float4(0, 0, 0, 0);
-    skinned += mul(_Bones[offset + weight.boneIndex0].comb, skinVertex) * weight.weight0;
-    skinned += mul(_Bones[offset + weight.boneIndex1].comb, skinVertex) * weight.weight1;
+    skinned += mul(_Bones[offset + weight.boneIndex0].combined, skinVertex) * weight.weight0;
+    skinned += mul(_Bones[offset + weight.boneIndex1].combined, skinVertex) * weight.weight1;
     return mul(_BindMatrixInv, skinned).xyz;
 }
 
@@ -92,8 +91,8 @@ float3 GetSkinnedNormal(float3 normal, uint vid, uint iid) {
 
     int offset = iid * _BonesCount;
     float4x4 skinMatrix = float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-    skinMatrix += weight.weight0 * _Bones[offset + weight.boneIndex0].comb;
-    skinMatrix += weight.weight1 * _Bones[offset + weight.boneIndex1].comb;
+    skinMatrix += weight.weight0 * _Bones[offset + weight.boneIndex0].combined;
+    skinMatrix += weight.weight1 * _Bones[offset + weight.boneIndex1].combined;
     skinMatrix = mul(mul(_BindMatrixInv, skinMatrix), _BindMatrix);
     return mul(skinMatrix, float4(normal, 0)).xyz;
 }

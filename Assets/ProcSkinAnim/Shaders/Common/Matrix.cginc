@@ -186,6 +186,11 @@ float4x4 look_at_matrix(float3 at, float3 eye, float3 up)
     return axis_matrix(xaxis, yaxis, zaxis);
 }
 
+bool _is_unexpected(float x)
+{
+    return isnan(x) || !isfinite(x);
+}
+
 float4x4 extract_rotation_matrix(float4x4 m)
 {
     float sx = length(float3(m[0][0], m[0][1], m[0][2]));
@@ -193,36 +198,50 @@ float4x4 extract_rotation_matrix(float4x4 m)
     float sz = length(float3(m[2][0], m[2][1], m[2][2]));
 
     // if determine is negative, we need to invert one scale
-    float det = determinant(m);
-    if (det < 0) {
-        sx = -sx;
-    }
+    // float det = determinant(m);
+    // sx = lerp(-sx, sx, step(0, det));
+
+    sx = lerp(1, sx, step(0, sx));
+    sy = lerp(1, sy, step(0, sy));
+    sz = lerp(1, sz, step(0, sz));
 
     float invSX = 1.0 / sx;
     float invSY = 1.0 / sy;
     float invSZ = 1.0 / sz;
 
-    m[0][0] *= invSX;
-    m[0][1] *= invSX;
-    m[0][2] *= invSX;
-    m[0][3] = 0;
+    // invSX = lerp(invSX, 1, (float)_is_unexpected(invSX));
+    // invSY = lerp(invSY, 1, (float)_is_unexpected(invSY));
+    // invSZ = lerp(invSZ, 1, (float)_is_unexpected(invSZ));
 
-    m[1][0] *= invSY;
-    m[1][1] *= invSY;
-    m[1][2] *= invSY;
-    m[1][3] = 0;
+    float4x4 nm = IDENTITY_MATRIX;
 
-    m[2][0] *= invSZ;
-    m[2][1] *= invSZ;
-    m[2][2] *= invSZ;
-    m[2][3] = 0;
+    nm[0][0] = m[0][0] * invSX;
+    nm[0][1] = m[0][1] * invSX;
+    nm[0][2] = m[0][2] * invSX;
 
-    m[3][0] = 0;
-    m[3][1] = 0;
-    m[3][2] = 0;
-    m[3][3] = 1;
+    nm[1][0] = m[1][0] * invSY;
+    nm[1][1] = m[1][1] * invSY;
+    nm[1][2] = m[1][2] * invSY;
 
-    return m;
+    nm[2][0] = m[2][0] * invSZ;
+    nm[2][1] = m[2][1] * invSZ;
+    nm[2][2] = m[2][2] * invSZ;
+
+    /*
+    nm[0][0] = lerp(nm[0][0], 1, (float)_is_unexpected(nm[0][0]));
+    nm[0][1] = lerp(nm[0][1], 0, (float)_is_unexpected(nm[0][1]));
+    nm[0][2] = lerp(nm[0][2], 0, (float)_is_unexpected(nm[0][2]));
+
+    nm[1][0] = lerp(nm[1][0], 0, (float)_is_unexpected(nm[1][0]));
+    nm[1][1] = lerp(nm[1][1], 1, (float)_is_unexpected(nm[1][1]));
+    nm[1][2] = lerp(nm[1][2], 0, (float)_is_unexpected(nm[1][2]));
+
+    nm[2][0] = lerp(nm[2][0], 0, (float)_is_unexpected(nm[2][0]));
+    nm[2][1] = lerp(nm[2][1], 0, (float)_is_unexpected(nm[2][1]));
+    nm[2][2] = lerp(nm[2][2], 1, (float)_is_unexpected(nm[2][2]));
+    */
+
+    return nm;
 }
 
 #endif // __MATRIX_INCLUDED__

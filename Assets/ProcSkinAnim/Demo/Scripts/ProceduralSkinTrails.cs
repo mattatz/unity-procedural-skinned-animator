@@ -25,6 +25,8 @@ namespace ProcSkinAnim.Demo
         [SerializeField] protected float noiseAmplitude = 1.0f;
         [SerializeField] protected float noiseFrequency = 0.01f;
         [SerializeField] protected float noiseMotion = 1.0f;
+        [SerializeField] protected Transform attractor;
+        [SerializeField] protected float attractorSpread = 1.0f;
         protected Vector3 noiseOffset;
 
         #endregion
@@ -43,6 +45,7 @@ namespace ProcSkinAnim.Demo
         protected const string kSpeedRangeKey = "_SpeedRange";
         protected const string kDamperKey = "_Damper";
         protected const string kGravityKey = "_Gravity";
+        protected const string kAttractorKey = "_Attractor";
         protected const string kNoiseParamsKey = "_NoiseParams", kNoiseOffsetKey = "_NoiseOffset";
 
         protected Vector3 min, max, center;
@@ -112,6 +115,9 @@ namespace ProcSkinAnim.Demo
             trailCompute.SetVector(kSpeedRangeKey, new Vector2(speedMin, speedMax));
             trailCompute.SetVector(kDamperKey, new Vector2(Mathf.Exp(-drag * dt), speedLimit));
             trailCompute.SetVector(kGravityKey, gravity * dt);
+
+            var ap = transform.InverseTransformPoint(attractor.position);
+            trailCompute.SetVector(kAttractorKey, new Vector4(ap.x, ap.y, ap.z, attractorSpread));
             trailCompute.SetVector(kNoiseParamsKey, new Vector2(noiseFrequency, noiseAmplitude * dt));
 
             var noiseDir = (gravity == Vector3.zero) ? Vector3.up : gravity.normalized;
@@ -181,7 +187,41 @@ namespace ProcSkinAnim.Demo
         protected override void OnDrawGizmosSelected ()
         {
             if (trailBuffer == null) return;
+
+            // DebugBones();
             // DrawTrailGizmos();
+        }
+
+        void DebugBones ()
+        {
+            var bones = new GPUBone[boneBuffer.count];
+            boneBuffer.GetData(bones);
+            for(int i = 0, n = bones.Length; i < n; i++)
+            {
+                var bone = bones[i];
+                var r = bone.rotation;
+                if(
+                    float.IsNaN(r.m00) ||
+                    float.IsNaN(r.m01) ||
+                    float.IsNaN(r.m02) ||
+                    float.IsNaN(r.m03) ||
+                    float.IsNaN(r.m10) ||
+                    float.IsNaN(r.m11) ||
+                    float.IsNaN(r.m12) ||
+                    float.IsNaN(r.m13) ||
+                    float.IsNaN(r.m20) ||
+                    float.IsNaN(r.m21) ||
+                    float.IsNaN(r.m22) ||
+                    float.IsNaN(r.m23) ||
+                    float.IsNaN(r.m30) ||
+                    float.IsNaN(r.m31) ||
+                    float.IsNaN(r.m32) ||
+                    float.IsNaN(r.m33)
+                )
+                {
+                    Debug.Log(r);
+                }
+            }
         }
 
         void DrawTrailGizmos() {
@@ -200,9 +240,8 @@ namespace ProcSkinAnim.Demo
                     var cur = trails[index];
                     Gizmos.color = Color.white;
 
-                    // var next = trails[index + 1];
-                    // Gizmos.DrawLine(cur.position, next.position);
                     Gizmos.DrawWireSphere(cur.position, size);
+                    DebugTrail(cur);
 
                     Vector3 t = cur.tangent, n = cur.normal, b = cur.binormal;
                     Gizmos.color = Color.green;
@@ -213,7 +252,23 @@ namespace ProcSkinAnim.Demo
                     Gizmos.DrawLine(cur.position, cur.position + b * length);
                 }
             }
+        }
 
+        void DebugTrail(GPUTrail tr)
+        {
+            Vector3 t = tr.tangent, n = tr.normal, b = tr.binormal;
+            if(float.IsNaN(t.x) || float.IsNaN(t.y) || float.IsNaN(t.z) || t.sqrMagnitude <= float.Epsilon)
+            {
+                Debug.Log(t);
+            }
+            if(float.IsNaN(n.x) || float.IsNaN(n.y) || float.IsNaN(n.z) || n.sqrMagnitude <= float.Epsilon)
+            {
+                Debug.Log(n);
+            }
+            if(float.IsNaN(b.x) || float.IsNaN(b.y) || float.IsNaN(b.z) || b.sqrMagnitude <= float.Epsilon)
+            {
+                Debug.Log(b);
+            }
         }
  
         protected override void OnDestroy()

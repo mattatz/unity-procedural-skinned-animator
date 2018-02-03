@@ -7,15 +7,20 @@ namespace ProcSkinAnim
 
     public struct GPUBone {
         public Vector3 position;
+        // public Quaternion rotation;
         public Matrix4x4 rotation;
         public Vector3 scale;
 
-        public Matrix4x4 comb, local, offset;
+        public Matrix4x4 combined, local, offset;
 
         public GPUBone(Vector3 tr, Quaternion rot, Vector3 s)
         {
-            comb = Matrix4x4.identity;
+            combined = Matrix4x4.identity;
+
+            // Calcuate local pose matrix in ProcSkinAnim.compute
             local = Matrix4x4.TRS(tr, rot, s);
+
+            // Global pose offset matrix
             offset = local.inverse;
 
             position = Vector3.zero;

@@ -10,7 +10,7 @@ struct GPUBone
     // float4 rotation;
     float4x4 rotation;
     float3 scale;
-    float4x4 comb, local, offset;
+    float4x4 combined, local, offset;
 };
 
 struct GPUBoneWeight

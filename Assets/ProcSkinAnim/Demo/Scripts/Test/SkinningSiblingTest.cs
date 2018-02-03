@@ -119,7 +119,7 @@ namespace ProcSkinAnim.Demo
                 var bone = new GPUBone(global.T, global.R, global.S);
                 var curM = Matrix4x4.TRS(current.transform.localPosition, current.transform.localRotation, current.transform.localScale);
                 var diff = (curM * local.IM);
-                bone.comb = (offset * (diff * local.M)) * global.IM;
+                bone.combined = (offset * (diff * local.M)) * global.IM;
                 data[i] = bone;
             }
             boneBuffer.SetData(data);
