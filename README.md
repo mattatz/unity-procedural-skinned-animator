@@ -3,11 +3,11 @@ unity-procedural-skinned-animator
 
 GPU procedural skinned mesh animator for Unity.
 
-![FlowTrails](https://raw.githubusercontent.com/mattatz/unity-voxel/master/Captures/FlowTrails.gif)
+![FlowTrails](https://raw.githubusercontent.com/mattatz/unity-procedural-skinned-animator/master/Captures/FlowTrails.gif)
 
 ## FlowTrails
 
-![FlowTrailsZoom](https://raw.githubusercontent.com/mattatz/unity-voxel/master/Captures/FlowTrailsZoom.gif)
+![FlowTrailsZoom](https://raw.githubusercontent.com/mattatz/unity-procedural-skinned-animator/master/Captures/FlowTrailsZoom.gif)
 
 Referred to Keijiro Takahashi works for trail implementation⚡️ [Swarm](https://github.com/keijiro/Swarm)
 
